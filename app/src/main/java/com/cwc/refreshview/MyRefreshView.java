@@ -92,6 +92,7 @@ public class MyRefreshView extends View {
         canvas.drawPath(mPath, mPaint);
         if (mIsReseting){
             resetView();
+            
         }
     }
 
