@@ -7,10 +7,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-
-import java.security.cert.PolicyNode;
 
 /**
  * @author Cuiweicong
@@ -59,7 +56,6 @@ public class MyRefreshView extends View {
         PointF start = new PointF(0, height);
         PointF end = new PointF(mWidth, height);
         PointF control = new PointF(mWidth / 2, mHeight);
-
         PointF highest = getBezierPointF((float) 0.5, start, end, control);
         int measureHeight = (int) highest.y;
         setMeasuredDimension(mWidth, measureHeight);
