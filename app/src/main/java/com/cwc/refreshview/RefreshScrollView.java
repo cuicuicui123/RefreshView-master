@@ -22,7 +22,6 @@ public class RefreshScrollView extends ScrollView {
     private LinearLayout mMyRefreshLayout;
     private View mHeaderView;
     private boolean mIsDragging;
-
     private int mStartY;
     private int mEndY;
 
@@ -51,6 +50,7 @@ public class RefreshScrollView extends ScrollView {
         mHeaderView = LayoutInflater.from(mContext).inflate(R.layout.header, mMyRefreshLayout, false);
 
         mMyRefreshView = (MyRefreshView) mHeaderView.findViewById(R.id.refreshView);
+
         //现在ScrollView中添加LinearLayout
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);

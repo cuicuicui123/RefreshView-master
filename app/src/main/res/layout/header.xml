@@ -7,17 +7,7 @@
     <com.cwc.refreshview.MyRefreshView
         android:id="@+id/refreshView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="44dp"/>
+        android:layout_height="wrap_content"/>
 
-    <ImageView
-        android:id="@+id/iv"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:src="@mipmap/ic_launcher"
-        android:scaleType="fitCenter"
-        android:layout_alignBottom="@id/refreshView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="-22dp"/>
 
 </RelativeLayout>
