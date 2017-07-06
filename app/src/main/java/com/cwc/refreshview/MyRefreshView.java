@@ -8,14 +8,14 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import com.facebook.rebound.SimpleSpringListener;
+import com.facebook.rebound.Spring;
+import com.facebook.rebound.SpringSystem;
 
 /**
  * @author Cuiweicong
@@ -37,8 +37,8 @@ public class MyRefreshView extends View {
 
     private int multiple = 3;
     private Bitmap mBitmap;
+    private Spring spring;
 
-    private boolean mIsReseting = false;
     private static final int INVALIDATE_CODE = 1;
     private static final int RESET_IMAGE_CODE = 2;
 
@@ -46,10 +46,9 @@ public class MyRefreshView extends View {
     private static final int STATE_LESS_RISE = 1;
     private static final int STATE_LESS_DROP = 2;
     private int v1;
-    private int v2;
-    private int v3;
 
     private int mState;
+    private boolean mIsReseting = true;
 
 
     public MyRefreshView(Context context) {
@@ -79,6 +78,8 @@ public class MyRefreshView extends View {
         mLinePaint.setAntiAlias(true);
         mBitmapWidth = (int) getResources().getDimension(R.dimen.image_width);
         mBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        SpringSystem springSystem = SpringSystem.create();
+        spring = springSystem.createSpring();
     }
 
 
@@ -122,6 +123,7 @@ public class MyRefreshView extends View {
         RectF rectF = new RectF((mWidth - mBitmapWidth) / 2, mLineLocationY - mBitmapWidth / 2, (mWidth +
                 mBitmapWidth) / 2, mLineLocationY + mBitmapWidth / 2);
         canvas.drawBitmap(mBitmap, null, rectF, null);
+        Log.i("height", mHeight + "");
     }
 
     /**
@@ -130,6 +132,7 @@ public class MyRefreshView extends View {
      * @param height 手指下拉距离
      */
     public void addHeight(int height){
+        mLinePaint.setColor(getResources().getColor(R.color.blue));
         mHeight = mLocalHeight;
         mDragHeight = height / multiple;
         mHeight += mDragHeight;
@@ -140,7 +143,6 @@ public class MyRefreshView extends View {
      * 手指松开之后重置
      */
     public void reset(){
-        mIsReseting = true;
         resetView();
     }
 
@@ -148,76 +150,24 @@ public class MyRefreshView extends View {
      * 回弹过程
      */
     public void resetView(){
-        v1 = 0;
-        final Handler handler = new Handler(){
+        int height = mHeight;
+        spring.addListener(new SimpleSpringListener(){
             @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                switch (msg.what) {
-                    case INVALIDATE_CODE:
-                        requestLayout();
-                        invalidate();
-                        break;
-                    case RESET_IMAGE_CODE:
-                        break;
+            public void onSpringUpdate(Spring spring) {
+                mHeight = (int) spring.getCurrentValue();
+                if (mHeight < mMaxHeight) {
+                    mLinePaint.setColor(0xffffffff);
+                } else {
+                    mLinePaint.setColor(getResources().getColor(R.color.blue));
                 }
+                requestLayout();
             }
-        };
-
-        mState = STATE_BEYOND_RISE;
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                switch (mState) {
-                    case STATE_BEYOND_RISE:
-                        //这里有问题
-                        if (mHeight > mMaxHeight) {
-                            v1 += 2;
-                            mHeight -= v1;
-                            if (mHeight < mMaxHeight) {
-                                mHeight = mMaxHeight;
-                            }
-                            handler.sendEmptyMessage(INVALIDATE_CODE);
-                        } else {
-                            mHeight = mMaxHeight;
-                            mLocalHeight = mMaxHeight;
-                            mIsReseting = false;
-                            handler.sendEmptyMessage(INVALIDATE_CODE);
-                            mState = STATE_LESS_RISE;
-                            mLinePaint.setColor(0xffffffff);
-                        }
-                        break;
-                    case STATE_LESS_RISE:
-                        if (v1 > 0) {
-                            v1 -= 6;
-                            mHeight -= v1;
-                            handler.sendEmptyMessage(INVALIDATE_CODE);
-                        } else {
-                            mState = STATE_LESS_DROP;
-                            mLinePaint.setColor(0xffffffff);
-                        }
-                        break;
-                    case STATE_LESS_DROP:
-                        if ((mHeight + v1) < mMaxHeight) {
-                            v1 += 2;
-                            mHeight += v1;
-                            handler.sendEmptyMessage(INVALIDATE_CODE);
-                        } else {
-                            mHeight = mMaxHeight;
-                            mLocalHeight = mMaxHeight;
-                            handler.sendEmptyMessage(INVALIDATE_CODE);
-                            handler.sendEmptyMessage(RESET_IMAGE_CODE);
-                            mState = STATE_BEYOND_RISE;
-                            mLinePaint.setColor(getResources().getColor(R.color.blue));
-                            timer.cancel();
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }, 0, 20);
+        });
+        spring.setCurrentValue(height);
+        spring.setEndValue(mMaxHeight);
     }
 
+    public boolean isResetting() {
+        return mIsReseting;
+    }
 }

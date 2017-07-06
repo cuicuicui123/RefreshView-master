@@ -81,7 +81,7 @@ public class RefreshScrollView extends ScrollView {
                 case MotionEvent.ACTION_MOVE:
                     mEndY = (int) ev.getY();
                     int dis = mEndY - mStartY;
-                    if (dis > 0) {
+                    if (dis > 0 && mMyRefreshView.isResetting()) {
                         mMyRefreshView.addHeight(dis);
                         mIsDragging = true;
                     }
